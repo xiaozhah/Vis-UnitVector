@@ -2,8 +2,8 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>D3: A simple scatterplot, setting radii from data</title>
-		<script type="text/javascript" src="../d3.js"></script>
+		<title>Vis UnitVector</title>
+		<script type="text/javascript" src="d3/d3.js"></script>
 		<style type="text/css">
 			/* No style rules here yet */		
 		</style>
@@ -16,9 +16,8 @@
 			var h = 600;
 			
 			var dataset; // a global
-			d3.json("Unit2Vec_tSNE.json", function(error, json) 
+			d3.json("Unit2Vec_tSNE.json").then(function(json) 
 			{
-			  if (error) return console.warn(error);
 			  dataset = json;
 			  visualize();
 			});
@@ -54,10 +53,12 @@
 				.attr("cy", function(d) {
 					return yScale(d3.values(d)[0].pos[1]);
 				})
-				.attr("r", .5)
+				.attr("r", 2)
 				.attr("fill", function(d) {
 			    	return color(d3.values(d)[0].lab);
-			    });
+			    })
+			    .on("click",function(d){
+			    	console.log(d);});
 			}		
 		</script>
 	</body>
