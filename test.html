@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: A simple scatterplot, setting radii from data</title>
+		<script type="text/javascript" src="../d3.js"></script>
+		<style type="text/css">
+			/* No style rules here yet */		
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 1000;
+			var h = 600;
+			
+			var dataset; // a global
+			d3.json("Unit2Vec_tSNE.json", function(error, json) 
+			{
+			  if (error) return console.warn(error);
+			  dataset = json;
+			  visualize();
+			});
+	
+			function visualize()
+			{
+				//Create SVG element
+				var svg = d3.select("body")
+				.append("svg")
+				.attr("width", w)
+				.attr("height", h);
+
+				var min_x = d3.min(dataset,function(d){return d3.values(d)[0].pos[0]})
+				var max_x = d3.max(dataset,function(d){return d3.values(d)[0].pos[0]})
+
+				var min_y = d3.min(dataset,function(d){return d3.values(d)[0].pos[1]})
+				var max_y = d3.max(dataset,function(d){return d3.values(d)[0].pos[1]})
+
+				var xScale = d3.scaleLinear().domain([min_x,max_x]).range([0,w])
+				var yScale = d3.scaleLinear().domain([min_y,max_y]).range([h,0])
+
+				var color = d3.scaleOrdinal()
+						    .domain(["a", "ai", "an", "ang", "ao", "b", "c", "ch", "d", "e", "ei", "en", "eng", "er", "f", "g", "h", "i", "ia", "ian", "iang", "iao", "ie", "ii", "iii", "in", "ing", "iong", "iou", "j", "k", "l", "m", "n", "o", "ong", "ou", "p", "q", "r", "s", "sh", "sil", "sp", "t", "u", "ua", "uai", "uan", "uang", "uei", "uen", "ueng", "uo", "v", "van", "ve", "vn", "x", "z", "zh"])
+						    .range(["#781c86", "#6d1c90", "#621d99", "#571ea2", "#4e20ab", "#4a27b2","#462eb9", "#4236c1", "#403ec6", "#3f47c9", "#3f51cc", "#3e5acf","#3f63cf", "#416bce", "#4274ce", "#447ccd", "#4783c8", "#498ac4", "#4c90c0", "#4f97bb", "#539bb5", "#56a0ae", "#5aa5a8", "#5ea9a1", "#63ac9a", "#68af93", "#6cb28c", "#72b485", "#78b67e", "#7db877", "#83ba70", "#89bb6b", "#90bc65", "#96bd60", "#9dbe5a", "#a3be56", "#aabd52", "#b0bd4e", "#b7bd4b", "#bdbb48", "#c3ba46", "#c9b843", "#ceb541", "#d3b240", "#d8ae3e", "#dcab3c", "#dfa53b", "#e19f3a", "#e49938", "#e69237", "#e68a35", "#e68133", "#e67832", "#e56e30", "#e4632e", "#e2582c", "#e04e29", "#df4327", "#dd3726", "#dc2c24", "#db2122"]);
+
+				svg.selectAll("circle")
+				.data(dataset)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) {
+					return xScale(d3.values(d)[0].pos[0]);
+				})
+				.attr("cy", function(d) {
+					return yScale(d3.values(d)[0].pos[1]);
+				})
+				.attr("r", .5)
+				.attr("fill", function(d) {
+			    	return color(d3.values(d)[0].lab);
+			    });
+			}		
+		</script>
+	</body>
+</html>
