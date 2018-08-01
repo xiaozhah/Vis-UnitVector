@@ -1,65 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Vis UnitVector</title>
-		<script type="text/javascript" src="d3/d3.js"></script>
-		<style type="text/css">
-			/* No style rules here yet */		
-		</style>
-	</head>
-	<body>
-		<script type="text/javascript">
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>Vis UnitVector</title>
+        <script type='text/javascript' src='d3/d3.js'></script>
+        <style type='text/css'>
+            /* No style rules here yet */       
+        </style>
+    </head>
+    <body>
+        <script type='text/javascript'>
 
-			//Width and height
-			var w = 1000;
-			var h = 600;
-			
-			var dataset; // a global
-			d3.json("Unit2Vec_tSNE.json").then(function(json) 
-			{
-			  dataset = json;
-			  visualize();
-			});
-	
-			function visualize()
-			{
-				//Create SVG element
-				var svg = d3.select("body")
-				.append("svg")
-				.attr("width", w)
-				.attr("height", h);
+            //Width and height
+            var w = 1170, h=680;
+            
+            var dataset, cur_lab, selectQ = false; // a global
+            d3.json('Unit2Vec_tSNE.json').then(function(json) 
+            {
+              dataset = json;
+              visualize();
+            });
+    
+            function visualize()
+            {
+                //Create SVG element
+                var svg = d3.select('body')
+                .append('svg')
+                .attr('width', w)
+                .attr('height', h);
 
-				var min_x = d3.min(dataset,function(d){return d3.values(d)[0].pos[0]})
-				var max_x = d3.max(dataset,function(d){return d3.values(d)[0].pos[0]})
+                //创建背景用于触发点击事件（颜色复位）
+                var rect = svg.append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', w)
+                .attr('height', h)
+                .attr('fill','black');
 
-				var min_y = d3.min(dataset,function(d){return d3.values(d)[0].pos[1]})
-				var max_y = d3.max(dataset,function(d){return d3.values(d)[0].pos[1]})
+                var min_max_x = d3.extent(dataset,function(d){return d3.values(d)[0].pos[0]});
+                var min_x = min_max_x[0];
+                var max_x = min_max_x[1];
 
-				var xScale = d3.scaleLinear().domain([min_x,max_x]).range([0,w])
-				var yScale = d3.scaleLinear().domain([min_y,max_y]).range([h,0])
+                var min_max_y = d3.extent(dataset,function(d){return d3.values(d)[0].pos[1]});
+                var min_y = min_max_y[0];
+                var max_y = min_max_y[1];
 
-				var color = d3.scaleOrdinal()
-						    .domain(["a", "ai", "an", "ang", "ao", "b", "c", "ch", "d", "e", "ei", "en", "eng", "er", "f", "g", "h", "i", "ia", "ian", "iang", "iao", "ie", "ii", "iii", "in", "ing", "iong", "iou", "j", "k", "l", "m", "n", "o", "ong", "ou", "p", "q", "r", "s", "sh", "sil", "sp", "t", "u", "ua", "uai", "uan", "uang", "uei", "uen", "ueng", "uo", "v", "van", "ve", "vn", "x", "z", "zh"])
-						    .range(["#781c86", "#6d1c90", "#621d99", "#571ea2", "#4e20ab", "#4a27b2","#462eb9", "#4236c1", "#403ec6", "#3f47c9", "#3f51cc", "#3e5acf","#3f63cf", "#416bce", "#4274ce", "#447ccd", "#4783c8", "#498ac4", "#4c90c0", "#4f97bb", "#539bb5", "#56a0ae", "#5aa5a8", "#5ea9a1", "#63ac9a", "#68af93", "#6cb28c", "#72b485", "#78b67e", "#7db877", "#83ba70", "#89bb6b", "#90bc65", "#96bd60", "#9dbe5a", "#a3be56", "#aabd52", "#b0bd4e", "#b7bd4b", "#bdbb48", "#c3ba46", "#c9b843", "#ceb541", "#d3b240", "#d8ae3e", "#dcab3c", "#dfa53b", "#e19f3a", "#e49938", "#e69237", "#e68a35", "#e68133", "#e67832", "#e56e30", "#e4632e", "#e2582c", "#e04e29", "#df4327", "#dd3726", "#dc2c24", "#db2122"]);
+                //创建映射点位置的比例尺
+                var xScale = d3.scaleLinear().domain([min_x,max_x]).range([0,w]);
+                var yScale = d3.scaleLinear().domain([min_y,max_y]).range([h,0]);
 
-				svg.selectAll("circle")
-				.data(dataset)
-				.enter()
-				.append("circle")
-				.attr("cx", function(d) {
-					return xScale(d3.values(d)[0].pos[0]);
-				})
-				.attr("cy", function(d) {
-					return yScale(d3.values(d)[0].pos[1]);
-				})
-				.attr("r", 2)
-				.attr("fill", function(d) {
-			    	return color(d3.values(d)[0].lab);
-			    })
-			    .on("click",function(d){
-			    	console.log(d);});
-			}		
-		</script>
-	</body>
+
+                var phoneme = ['a', 'ai', 'an', 'ang', 'ao', 'b', 'c', 'ch', 'd', 'e', 'ei', 'en', 'eng', 'er', 'f', 'g', 'h', 'i', 'ia', 'ian', 'iang', 'iao', 'ie', 'ii', 'iii', 'in', 'ing', 'iong', 'iou', 'j', 'k', 'l', 'm', 'n', 'o', 'ong', 'ou', 'p', 'q', 'r', 's', 'sh', 'sil', 'sp', 't', 'u', 'ua', 'uai', 'uan', 'uang', 'uei', 'uen', 'ueng', 'uo', 'v', 'van', 've', 'vn', 'x', 'z', 'zh']
+                var color = ['#781c86', '#6d1c90', '#621d99', '#571ea2', '#4e20ab', '#4a27b2','#462eb9', '#4236c1', '#403ec6', '#3f47c9', '#3f51cc', '#3e5acf','#3f63cf', '#416bce', '#4274ce', '#447ccd', '#4783c8', '#498ac4', '#4c90c0', '#4f97bb', '#539bb5', '#56a0ae', '#5aa5a8', '#5ea9a1', '#63ac9a', '#68af93', '#6cb28c', '#72b485', '#78b67e', '#7db877', '#83ba70', '#89bb6b', '#90bc65', '#96bd60', '#9dbe5a', '#a3be56', '#aabd52', '#b0bd4e', '#b7bd4b', '#bdbb48', '#c3ba46', '#c9b843', '#ceb541', '#d3b240', '#d8ae3e', '#dcab3c', '#dfa53b', '#e19f3a', '#e49938', '#e69237', '#e68a35', '#e68133', '#e67832', '#e56e30', '#e4632e', '#e2582c', '#e04e29', '#df4327', '#dd3726', '#dc2c24', '#db2122']
+                //创建音素与对应颜色的序数比例尺
+                var color_map = d3.scaleOrdinal()
+                            .domain(phoneme)
+                            .range(color);
+
+                //创建一个包含比例尺的字典，可以将音素时长映射在[-2,2]内
+                var color_map_dict = new Array();
+                for (var i = 0; i < phoneme.length; i++) {
+                    var min_max_dur = d3.extent(
+                        dataset.filter(function(d) 
+                        {return d3.values(d)[0].lab == phoneme[i];}),
+                        function(d){return d3.values(d)[0].dur});
+
+                    color_map_dict[phoneme[i]] = d3.scaleLinear()
+                                        .domain([min_max_dur[0],min_max_dur[1]])
+                                        .range([-2,2]);
+                }
+
+                //触发背景点击事件，复位颜色的事件
+                svg.select('rect')
+                .on('click',function(d){
+                    d3.selectAll('circle')
+                    .attr('fill', function(d) {
+                        return color_map(d3.values(d)[0].lab);
+                        });
+                    selectQ = false;
+                });
+
+                //设置点的相关事件属性
+                svg.selectAll('circle')
+                .data(dataset)
+                .enter()
+                .append('circle')
+                .attr('cx', function(d) {
+                    return xScale(d3.values(d)[0].pos[0]);
+                })
+                .attr('cy', function(d) {
+                    return yScale(d3.values(d)[0].pos[1]);
+                })
+                .attr('r', 3)
+                .attr('fill', function(d) {
+                    return color_map(d3.values(d)[0].lab);
+                })
+                .call(d3.zoom().on('zoom',function(){
+                    svg.attr('transform',d3.event.transform);
+                }))
+                .on('mouseover',function(d){
+                    if(selectQ){
+                        if(d3.values(d)[0].lab == cur_lab)
+                            new Audio('wav_phone/'+d3.values(d)[0].name+'.wav').play();
+                    }
+                    else
+                        new Audio('wav_phone/'+d3.values(d)[0].name+'.wav').play();
+                })
+                .on('click',function(d){
+                    cur_lab = d3.values(d)[0].lab;
+                    //给指定点上彩色，并根据每个单元时长不同上不一样的亮度
+                    //时长越小越按，越大越亮
+                    d3.selectAll('circle').filter(function(d) {
+                        return d3.values(d)[0].lab == cur_lab;
+                    })
+                    .attr('fill', function(d) {
+                        var dur_this = d3.values(d)[0].dur;
+                        var lab_this = d3.values(d)[0].lab
+                        return d3.rgb(color_map(lab_this)).darker(color_map_dict[lab_this](dur_this));
+                        })
+                    //给其余点上灰色
+                    d3.selectAll('circle').filter(function(d) {
+                        return d3.values(d)[0].lab != cur_lab;
+                    })
+                    .attr('fill','grey');
+                    selectQ = true;
+                })
+                ;
+            }
+        </script>
+    </body>
 </html>

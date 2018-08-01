@@ -4,6 +4,7 @@ import json
 from collections import OrderedDict
 import glob
 import os
+import random
 
 def ReadFloatRawMat(datafile,column):
 	data = np.fromfile(datafile,dtype=np.float32)
@@ -16,9 +17,13 @@ def ReadFloatRawMat(datafile,column):
 	data.shape = [len(data)/column,column]
 	return np.float64(data)
 
-data = ReadFloatRawMat('Unit2Vec_tSNE.dat',2)[:10000]
-txt = np.loadtxt('phone_name_frame_id.csv',dtype=str,usecols=(1,3))[:10000]
-phone = np.loadtxt('filelist.lst',dtype=str)[:10000]
+# Random select 10000 points
+idx = range(10000)
+random.shuffle(idx)
+
+data = ReadFloatRawMat('Unit2Vec_tSNE.dat',2)[idx]
+txt = np.loadtxt('phone_name_frame_id.csv',dtype=str,usecols=(1,3))[idx]
+phone = np.loadtxt('filelist.lst',dtype=str)[idx]
 
 lab = txt[:,0]
 dur = map(lambda i:int(i),txt[:,1])
