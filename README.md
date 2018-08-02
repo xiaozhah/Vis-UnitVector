@@ -6,5 +6,13 @@
 使用test.html渲染 并使用JavaScript与D3可视化
 
 这里wav_phone没有上传因为包含459753个文件
-
 ![wav_phone](wav_phone.png)
+
+如果拥有wav_phone 流程是
+
+```
+python gen_json.py
+python -m SimpleHTTPServer 8888
+```
+然后浏览器中打开test.html
+
