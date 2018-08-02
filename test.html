@@ -30,12 +30,29 @@
                 .attr('height', h);
 
                 //创建背景用于触发点击事件（颜色复位）
-                var rect = svg.append('rect')
+                svg.append('rect')
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('width', w)
                 .attr('height', h)
-                .attr('fill','black');
+                .attr('fill','black')
+                .on('click',function(d){
+                	//触发背景点击事件，复位颜色的事件
+                    d3.selectAll('circle')
+                    .attr('fill', function(d) {
+                        return color_map(d3.values(d)[0].lab);
+                        });
+                    //给文本传空字符串，因为当前点击的是背景而没点击任何点
+                    d3.select('text').text('');
+                    selectQ = false;
+                });
+
+                //添加文本显示当前点击的点对应的音素类别
+                svg.append('text')
+                .attr('x',50)
+                .attr('y',80)
+                .attr('font-size',50)
+                .attr('fill','white');
 
                 var min_max_x = d3.extent(dataset,function(d){return d3.values(d)[0].pos[0]});
                 var min_x = min_max_x[0];
@@ -68,17 +85,7 @@
                     color_map_dict[phoneme[i]] = d3.scaleLinear()
                                         .domain([min_max_dur[0],min_max_dur[1]])
                                         .range([-2,2]);
-                }
-
-                //触发背景点击事件，复位颜色的事件
-                svg.select('rect')
-                .on('click',function(d){
-                    d3.selectAll('circle')
-                    .attr('fill', function(d) {
-                        return color_map(d3.values(d)[0].lab);
-                        });
-                    selectQ = false;
-                });
+                }                
 
                 //设置点的相关事件属性
                 svg.selectAll('circle')
@@ -123,6 +130,8 @@
                         return d3.values(d)[0].lab != cur_lab;
                     })
                     .attr('fill','grey');
+                    //给文本传当前点击的音素名
+                    d3.select('text').text(cur_lab);
                     selectQ = true;
                 })
                 ;
